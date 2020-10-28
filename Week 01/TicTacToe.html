@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: green;
+            display: inline-block;
+            border: 1px solid white;
+            vertical-align: middle;
+
+            line-height: 100px;
+            font-size: 50px;
+            text-align: center;
+        }
+    </style>
+
+    <div id="board"></div>
+
+    <script>
+        // 棋盘
+        let pattern = [
+            [2, 0, 0],
+            [0, 1, 0],
+            [0, 0, 0]
+        ]
+
+        // 落子方1或2，初始为1
+        let player = 1;
+
+        // 创建棋盘
+        function show() {
+            let board = document.getElementById("board");
+
+            // 每一次show的时候清空棋盘
+            board.innerHTML = "";
+
+            for(let i=0; i<3; i++) {
+                for(let j=0; j<3; j++) {
+                    let cell = document.createElement("div");
+                    cell.classList.add("cell");
+                    cell.innerText = 
+                        pattern[j][i] == 2 ? "❌" : 
+                        pattern[j][i] == 1 ? "⭕" : "";
+                    // 添加点击事件（落子）
+                    cell.addEventListener("click", () => move(i, j))
+                    board.appendChild(cell);
+                }
+                board.appendChild(document.createElement("br"))
+            }
+        }
+
+        // 落子
+        function move(x, y) {
+            pattern[y][x] = player;
+            // 判断胜负
+            if (check(pattern, player)) {
+                alert(player == 2 ? "❌ is winner!" : "⭕ is winner!");
+            }
+            // 交替落子
+            player = 3 - player;
+            if (willWin(pattern, player)) {
+                console.log(player == 2 ? "❌ is winner!" : "⭕ is winner!");
+            }
+            show()
+        }
+
+        // 判断胜负 只用判断当前落子的player
+        function check(pattern, player) {
+            // 验证每一行
+            for (let i=0; i<3; i++) {
+                let win = true;
+                for (let j=0; j<3; j++) {
+                    if (pattern[i][j] !== player) {
+                        win = false;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            }
+            // 验证每一列
+            for (let i=0; i<3; i++) {
+                let win = true;
+                for (let j=0; j<3; j++) {
+                    if (pattern[j][i] !== player) {
+                        win = false;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            }
+            // 验证对角线
+            {
+                let win = true;
+                for (let i=0; i<3; i++) {
+                    if (pattern[i][i] !== player) {
+                        win = false;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            }
+            // 验证对角线
+            {
+                let win = true;
+                for (let i=0; i<3; i++) {
+                    if (pattern[i][2-i] !== player) {
+                        win = false;
+                    }
+                }
+                if (win) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function clone(pattern) {
+            return JSON.parse(JSON.stringify(pattern));
+        }
+
+        // 提前检查能否获胜
+        function willWin(pattern, player) {
+            for (let i=0; i<3; i++) {
+                for (let j=0; j<3; j++) {
+                    // 当前检查点不为空则直接跳过
+                    if (pattern[i][j]) {
+                        continue;
+                    }
+                    // 避免在原来的pattern上直接修改，clone一个原来的pattern
+                    let temp = clone(pattern);
+                    temp[i][j] = player;
+                    if (check(temp, player)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        show();
+    </script>
+</body>
+</html>
