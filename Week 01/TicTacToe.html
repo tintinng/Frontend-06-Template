@@ -26,15 +26,15 @@
     <script>
         // 棋盘
         let pattern = [
-            [2, 0, 0],
-            [0, 1, 0],
+            [0, 0, 0],
+            [0, 0, 0],
             [0, 0, 0]
         ]
 
         // 落子方1或2，初始为1
         let player = 1;
 
-        // 创建棋盘
+        // 显示棋盘
         function show() {
             let board = document.getElementById("board");
 
@@ -46,10 +46,10 @@
                     let cell = document.createElement("div");
                     cell.classList.add("cell");
                     cell.innerText = 
-                        pattern[j][i] == 2 ? "❌" : 
-                        pattern[j][i] == 1 ? "⭕" : "";
+                        pattern[i][j] == 2 ? "❌" : 
+                        pattern[i][j] == 1 ? "⭕" : "";
                     // 添加点击事件（落子）
-                    cell.addEventListener("click", () => move(i, j))
+                    cell.addEventListener("click", () => userMove(i, j))
                     board.appendChild(cell);
                 }
                 board.appendChild(document.createElement("br"))
@@ -57,18 +57,38 @@
         }
 
         // 落子
-        function move(x, y) {
-            pattern[y][x] = player;
+        function userMove(x, y) {
+            pattern[x][y] = player;
+            console.log(x, y);
             // 判断胜负
             if (check(pattern, player)) {
                 alert(player == 2 ? "❌ is winner!" : "⭕ is winner!");
             }
             // 交替落子
             player = 3 - player;
+            // 提前检查能否获胜
             if (willWin(pattern, player)) {
                 console.log(player == 2 ? "❌ is winner!" : "⭕ is winner!");
             }
             show()
+            // console.log(bestChoice(pattern, player));
+            computerMove();
+        }
+
+        // 机器落子
+        function computerMove() {
+            let choice = bestChoice(pattern, player)
+            // console.log(choice);
+            if (choice.point) {
+                // console.log(clone(pattern));
+                pattern[choice.point[1]][choice.point[0]] = player;
+                // console.log(pattern);
+            }
+            if (check(pattern, player)) {
+                alert(player == 2 ? "❌ is winner!" : "⭕ is winner!");
+            }
+            player = 3 - player;
+            show();
         }
 
         // 判断胜负 只用判断当前落子的player
@@ -140,9 +160,50 @@
                     let temp = clone(pattern);
                     temp[i][j] = player;
                     if (check(temp, player)) {
-                        return true;
+                        return [j, i];
                     }
                 }
+            }
+            return null;
+        }
+
+        // 判断当前最好选择，返回落子点和当前情况
+        function bestChoice(pattern, player) {
+            let p;
+            if (p = willWin(pattern, player)) {
+                return {
+                    point: p,
+                    result: 1
+                }
+            }
+            // 初始化当前最优选择：情况（最差）和落子点
+            let result = -2;
+            let point = null;
+            outer:for (let i=0; i<3; i++) {
+                for (let j=0; j<3; j++) {
+                    if (pattern[i][j]) {
+                        continue;
+                    }
+                    let temp = clone(pattern);
+                    temp[i][j] = player;
+                    // 递归判断当前落子后对方的最优选择
+                    let res = bestChoice(temp, 3 - player).result;
+                    // 若选择的最优选择（对方的最差选择）优于当前最优选择，则更新当前最优选择
+                    if (-res > result) {
+                        result = -res;
+                        point = [j, i];
+                    }
+                    // 胜负剪枝（退出到最外层循环）
+                    if (result == 1) {
+                        break outer;
+                    }
+                }
+            }
+
+            return {
+                point: point,
+                // 当前没有最优解，和棋
+                result: point ? result : 0
             }
         }
 
