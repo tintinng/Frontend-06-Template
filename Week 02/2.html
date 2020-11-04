@@ -24,9 +24,7 @@
             background-color: hotpink;
         }
     </style>
-    <div id="container">
-
-    </div>
+    <div id="container"></div>
     <button onclick="localStorage['map'] = JSON.stringify(map)">save</button>
 
     <script>
@@ -72,6 +70,43 @@
         document.addEventListener("mouseup", () => mousedown = false);
         // 取消掉右键默认的弹出菜单事件
         document.addEventListener("contextmenu", e => e.preventDefault());
+
+        function path(map, start, end) {
+            var queue = [start];
+
+            function insert(x, y) {
+                // 遇到地图边界
+                if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+                    return ;
+                }
+                // 遇到墙或者已经搜索过
+                if (map[100 * y + x]) {
+                    return ;
+                }
+                // 标记当前位置已搜索
+                map[100 * y + x] = 2;
+                // 入队
+                queue.push([x, y]);
+            }
+
+            while (queue.length) {
+                // 出队
+                let [x, y] = queue.shift();
+                console.log(x, y);
+                // 找到终点
+                if (x === end[0] && y === end[1]) {
+                    return true;
+                }
+
+                insert(x - 1, y);
+                insert(x , y - 1);
+                insert(x + 1, y);
+                insert(x , y + 1);
+            }
+
+            // 没找到
+            return false;
+        }
     </script>
 </body>
 </html>

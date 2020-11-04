@@ -24,9 +24,8 @@
             background-color: hotpink;
         }
     </style>
-    <div id="container">
-
-    </div>
+    <!-- map与children严格对应 -->
+    <div id="container"></div>
     <button onclick="localStorage['map'] = JSON.stringify(map)">save</button>
 
     <script>
@@ -72,6 +71,67 @@
         document.addEventListener("mouseup", () => mousedown = false);
         // 取消掉右键默认的弹出菜单事件
         document.addEventListener("contextmenu", e => e.preventDefault());
+
+        function sleep(t) {
+            return new Promise(resolve => {
+                setTimeout(resolve, t);
+            })
+        }
+
+        async function findpath(map, start, end) {
+            // 存放pre
+            let table = Object.create(map);
+            let queue = [start];
+
+            async function insert(x, y, pre) {
+                // 遇到地图边界
+                if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+                    return ;
+                }
+                // 遇到墙或者已经搜索过
+                if (table[100 * y + x]) {
+                    return ;
+                }
+
+                // await sleep(10);
+                // 记录当前位置的前驱位置,并标上颜色
+                table[100 * y + x] = pre;
+                container.children[100 * y + x].style.backgroundColor = "lightgreen";
+                // 入队
+                queue.push([x, y]);
+            }
+
+            while (queue.length) {
+                // 出队
+                let [x, y] = queue.shift();
+                // console.log(x, y);
+                // 找到终点
+                if (x === end[0] && y === end[1]) {
+                    let path = [];
+                    // 从终点往回找到起点
+                    while (x !== start[0] || y !== start[1]) {
+                        path.push([x, y]);
+                        [x, y] = table[100 * y + x];
+                        await sleep(25)
+                        container.children[100 * y + x].style.backgroundColor = "red";
+                    }
+                    return path;
+                }
+
+                await insert(x - 1, y, [x, y]);
+                await insert(x , y - 1, [x, y]);
+                await insert(x + 1, y, [x, y]);
+                await insert(x , y + 1, [x, y]);
+
+                await insert(x - 1, y - 1, [x, y]);
+                await insert(x - 1, y + 1, [x, y]);
+                await insert(x + 1, y + 1, [x, y]);
+                await insert(x + 1, y - 1, [x, y]);
+            }
+
+            // 没找到
+            return null;
+        }
     </script>
 </body>
 </html>
