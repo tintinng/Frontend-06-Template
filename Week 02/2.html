@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <style>
         .cell {
@@ -17,6 +19,7 @@
             border-right: solid 1px white;
             vertical-align: top;
         }
+
         #container {
             width: 701px;
             /* line-height: 7px; */
@@ -38,7 +41,7 @@
                 cell.classList.add("cell");
 
                 // 设置墙
-                if (map[100*y + x] == 1) {
+                if (map[100 * y + x] == 1) {
                     cell.style.backgroundColor = "black";
                 }
 
@@ -46,12 +49,12 @@
                     if (mousedown) {
                         if (clear) {
                             cell.style.backgroundColor = "";
-                            map[100*y + x] = 0;
+                            map[100 * y + x] = 0;
                         } else {
                             cell.style.backgroundColor = "black";
-                            map[100*y + x] = 1;
+                            map[100 * y + x] = 1;
                         }
-                    }   
+                    }
                 })
                 container.appendChild(cell);
             }
@@ -77,11 +80,11 @@
             function insert(x, y) {
                 // 遇到地图边界
                 if (x < 0 || x >= 100 || y < 0 || y >= 100) {
-                    return ;
+                    return;
                 }
                 // 遇到墙或者已经搜索过
                 if (map[100 * y + x]) {
-                    return ;
+                    return;
                 }
                 // 标记当前位置已搜索
                 map[100 * y + x] = 2;
@@ -99,14 +102,17 @@
                 }
 
                 insert(x - 1, y);
-                insert(x , y - 1);
+                insert(x, y - 1);
                 insert(x + 1, y);
-                insert(x , y + 1);
+                insert(x, y + 1);
             }
 
             // 没找到
+            alert('Not Found!')
             return false;
         }
+        path(map, [0, 0], [50, 50])
     </script>
 </body>
+
 </html>

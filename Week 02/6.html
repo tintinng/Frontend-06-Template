@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <style>
         .cell {
@@ -17,6 +19,7 @@
             border-right: solid 1px white;
             vertical-align: top;
         }
+
         #container {
             width: 701px;
             /* line-height: 7px; */
@@ -27,6 +30,11 @@
     <!-- map与children严格对应 -->
     <div id="container"></div>
     <button onclick="localStorage['map'] = JSON.stringify(map)">save</button>
+    <button onclick="location.reload()">reset</button>
+    <br>
+    <span>起始点：<input id="startPoint" type="text" value="[0,0]"></span>
+    <span>终止点：<input id="endPoint" type="text" value="[50,50]"></span>
+    <button id="search">开始搜索</button>
 
     <script>
         // 定义优先队列
@@ -37,7 +45,7 @@
             }
             take() {
                 if (!this.data.length) {
-                    return ;
+                    return;
                 }
                 let min = this.data[0];
                 let minIndex = 0;
@@ -74,7 +82,7 @@
                 cell.classList.add("cell");
 
                 // 设置墙
-                if (map[100*y + x] == 1) {
+                if (map[100 * y + x] == 1) {
                     cell.style.backgroundColor = "black";
                 }
 
@@ -82,12 +90,12 @@
                     if (mousedown) {
                         if (clear) {
                             cell.style.backgroundColor = "";
-                            map[100*y + x] = 0;
+                            map[100 * y + x] = 0;
                         } else {
                             cell.style.backgroundColor = "black";
-                            map[100*y + x] = 1;
+                            map[100 * y + x] = 1;
                         }
-                    }   
+                    }
                 })
                 container.appendChild(cell);
             }
@@ -126,11 +134,11 @@
             async function insert(x, y, pre) {
                 // 遇到地图边界
                 if (x < 0 || x >= 100 || y < 0 || y >= 100) {
-                    return ;
+                    return;
                 }
                 // 遇到墙或者已经搜索过
                 if (table[100 * y + x]) {
-                    return ;
+                    return;
                 }
 
                 await sleep(10);
@@ -159,9 +167,9 @@
                 }
 
                 await insert(x - 1, y, [x, y]);
-                await insert(x , y - 1, [x, y]);
+                await insert(x, y - 1, [x, y]);
                 await insert(x + 1, y, [x, y]);
-                await insert(x , y + 1, [x, y]);
+                await insert(x, y + 1, [x, y]);
 
                 await insert(x - 1, y - 1, [x, y]);
                 await insert(x - 1, y + 1, [x, y]);
@@ -172,6 +180,26 @@
             // 没找到
             return null;
         }
+
+        let searchBtn = document.getElementById('search');
+        searchBtn.addEventListener('click', () => {
+            let startPoint = document.getElementById('startPoint').value;
+            let endPoint = document.getElementById('endPoint').value;
+            // 输入值格式检测
+            let pattern = /\[([1-9]?\d|100),([1-9]?\d|100)\]/;
+            if (!pattern.test(startPoint) || !pattern.test(endPoint)) {
+                alert('请0-100内正确输入起点和终点：例：[10,10]');
+                return;
+            }
+            // 取起点值和终点值：'[10,10]' => [10,10]
+            let tempStart = startPoint.split(',');
+            let tempEnd = endPoint.split(',');
+            // '[10' => 10  &  '10]' => 10
+            let start = [Number(tempStart[0].slice(1, tempStart[0].length)), Number(tempStart[1].slice(0, tempStart[0].length - 1))];
+            let end = [Number(tempEnd[0].slice(1, tempEnd[0].length)), Number(tempEnd[1].slice(0, tempEnd[0].length - 1))];
+            findpath(map, start, end);
+        })
     </script>
 </body>
+
 </html>

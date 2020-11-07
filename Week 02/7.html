@@ -37,6 +37,95 @@
     <button id="search">开始搜索</button>
 
     <script>
+        // 定义优先队列
+        class Sorted {
+            constructor(data, compare) {
+                this.data = data.slice();
+                this.compare = compare || ((a, b) => a - b);
+            }
+            take() {
+                if (!this.data.length) {
+                    return;
+                }
+                let min = this.data[0];
+                let minIndex = 0;
+                // 遍历数组
+                for (let i = 1; i < this.data.length; i++) {
+                    // 更新最优解
+                    if (this.compare(min, this.data[i]) > 0) {
+                        min = this.data[i];
+                        minIndex = i;
+                    }
+                }
+                // 将最优解出队 (小技巧：将最后一个数存到第一个数，再pop最后一个数)
+                this.data[minIndex] = this.data[this.data.length - 1];
+                this.data.pop();
+
+                return min;
+            }
+            give(v) {
+                this.data.push(v);
+            }
+
+            get length() {
+                return this.data.length;
+            }
+        }
+
+        // 使用小顶堆
+        class BinaryHeap {
+            constructor(data, compare) {
+                this.data = data.slice();
+                this.compare = compare || ((a, b) => a - b);
+            }
+            take() {
+                let min = this.data[0];
+                // 将最大元素放在堆顶
+                this.data[0] = this.data.pop();
+                // 自上而下堆化
+                let i = 0;
+                while (i < this.data.length) {
+                    let pos = i;
+                    if (i * 2 + 1 < this.data.length && this.compare(this.data[i * 2 + 1], this.data[pos]) < 0) {
+                        pos = i * 2 + 1;
+                    }
+                    if (i * 2 + 2 < this.data.length && this.compare(this.data[i * 2 + 2], this.data[pos]) < 0) {
+                        pos = i * 2 + 2;
+                    }
+                    if (pos === i) {
+                        break;
+                    }
+                    this.swap(i, pos);
+                    i = pos;
+                }
+
+                return min;
+            }
+            give(v) {
+                // 插入最后
+                this.data.push(v);
+                let i = this.data.length - 1;
+                // 自下向上堆化
+                while (Math.floor((i - 1) / 2) >= 0 && this.compare(this.data[i], this.data[Math.floor((i - 1) / 2)]) < 0) {
+                    // 交换
+                    this.swap(i, Math.floor((i - 1) / 2))
+                    // let temp = this.data[i];
+                    // this.data[i] = this.data[Math.floor((i - 1) / 2)];
+                    // this.data[Math.floor((i - 1) / 2)] = temp;
+
+                    i = Math.floor((i - 1) / 2);
+                }
+            }
+            swap(a, b) {
+                let temp = this.data[a];
+                this.data[a] = this.data[b];
+                this.data[b] = temp;
+            }
+            get length() {
+                return this.data.length;
+            }
+        }
+
         // 如果localStorage里存储了地图则直接调用
         let map = localStorage["map"] ? JSON.parse(localStorage["map"]) : Array(10000).fill(0);
 
@@ -89,7 +178,13 @@
         async function findpath(map, start, end) {
             // 存放pre
             let table = Object.create(map);
-            let queue = [start];
+            // let queue = [start];
+            // let queue = new Sorted([start], (a, b) => distance(a) - distance(b))
+            let queue = new BinaryHeap([start], (a, b) => distance(a) - distance(b))
+
+            function distance(point) {
+                return (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2;
+            }
 
             async function insert(x, y, pre) {
                 // 遇到地图边界
@@ -106,12 +201,12 @@
                 table[100 * y + x] = pre;
                 container.children[100 * y + x].style.backgroundColor = "lightgreen";
                 // 入队
-                queue.push([x, y]);
+                queue.give([x, y]);
             }
 
             while (queue.length) {
                 // 出队
-                let [x, y] = queue.shift();
+                let [x, y] = queue.take();
                 // console.log(x, y);
                 // 找到终点
                 if (x === end[0] && y === end[1]) {
@@ -136,7 +231,7 @@
                 await insert(x + 1, y + 1, [x, y]);
                 await insert(x + 1, y - 1, [x, y]);
             }
-
+            console.log('Not found!');
             // 没找到
             return null;
         }
@@ -148,7 +243,7 @@
             // 输入值格式检测
             let pattern = /\[([1-9]?\d|100),([1-9]?\d|100)\]/;
             if (!pattern.test(startPoint) || !pattern.test(endPoint)) {
-                alert('请正确输入起点和终点：例：[10,10] 0-100');
+                alert('请0-100内正确输入起点和终点：例：[10,10]');
                 return;
             }
             // 取起点值和终点值：'[10,10]' => [10,10]
