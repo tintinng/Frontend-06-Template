@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 定义正则和捕获组，设置为全局模式
+        var regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g;
+        var dictionary = ["Number", "Whitespace", "LineTerminator", "*", "/", "+", "-"];
+
+        // 词法分析-分词
+        function* tokenize(source) {
+            var result = null;
+            var lastIndex = 0;
+            // 找寻所有可匹配结果
+            while (true) {
+                lastIndex = regexp.lastIndex;
+                result = regexp.exec(source);
+
+                if (!result) {
+                    break;
+                }
+                if (regexp.lastIndex - lastIndex > result[0].length) {
+                    break;
+                }
+
+                let token = {
+                    type: null,
+                    value: null
+                }
+
+                for (let i = 1; i <= dictionary.length; i++) {
+                    if (result[i]) {
+                        // console.log(dictionary[i - 1]);
+                        token.type = dictionary[i - 1];
+                    }
+                }
+                token.value = result[0];
+                yield token;
+                // console.log(result);
+            }
+            yield {
+                type: "EOF"
+            }
+        }
+
+        // 词法分析的结果
+        let source = [];
+
+        for (const token of tokenize("1 + 2 * 3 - 4")) {
+            if (token.type !== "Whitespace" && token.type !== "LineTerminator") {
+                source.push(token);
+            }
+        }
+
+        // 每一个产生式对应一个函数
+        // 四则运算表达式
+        function Expression(tokens) {
+            if (source[0].type === "AdditiveExpression" && source[1] && source[1].type === "EOF") {
+                let node = {
+                    type: "Expression",
+                    children: [source.shift(), source.shift()]
+                }
+                source.unshift(node);
+                return node;
+            }
+            AdditiveExpression(source);
+            return Expression(source);
+        }
+
+        // 加法表达式 <AdditiveExpression>
+        function AdditiveExpression(source) {
+            // <MultiplicationExpression>
+            if (source[0].type === "MultiplicationExpression") {
+                let node = {
+                    type: "AdditiveExpression",
+                    children: [source[0]]
+                }
+                source[0] = node;
+                return AdditiveExpression(source);
+            }
+            // <AdditiveExpression><+><MultiplicationExpression>
+            if (source[0].type === "AdditiveExpression" && source[1] && source[1].type === "+") {
+                let node = {
+                    type: "AdditiveExpression",
+                    operator: "+",
+                    children: []
+                }
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                MultiplicativeExpression(source);
+                node.children.push(source.shift());
+                source.unshift(node);
+                return AdditiveExpression(source);
+            }
+            // <AdditiveExpression><-><MultiplicationExpression>
+            if (source[0].type === "AdditiveExpression" && source[1] && source[1].type === "-") {
+                let node = {
+                    type: "AdditiveExpression",
+                    operator: "-",
+                    children: []
+                }
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                MultiplicativeExpression(source);
+                node.children.push(source.shift());
+                source.unshift(node);
+                return AdditiveExpression(source);
+            }
+            if (source[0].type === "AdditiveExpression") {
+                return source[0];
+            }
+            // 加法表达式包含了乘法表达式，单独的Number也作为MultiplicativeExpression
+            MultiplicativeExpression(source);
+
+            return AdditiveExpression(source);
+        }
+        // 乘法表达式 <MultiplicationExpression>
+        function MultiplicativeExpression(source) {
+            // <Number>
+            if (source[0].type === "Number") {
+                let node = {
+                    type: "MultiplicationExpression",
+                    children: [source[0]]
+                }
+                source[0] = node;
+                return MultiplicativeExpression(source);
+            }
+            // <MultiplicationExpression><*><Number>
+            if (source[0].type === "MultiplicationExpression" && source[1] && source[1].type === "*") {
+                let node = {
+                    type: "MultiplicationExpression",
+                    operator: "*",
+                    children: []
+                }
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                source.unshift(node);
+                return MultiplicativeExpression(source);
+            }
+            // <MultiplicationExpression></><Number>
+            if (source[0].type === "MultiplicationExpression" && source[1] && source[1].type === "/") {
+                let node = {
+                    type: "MultiplicationExpression",
+                    operator: "/",
+                    children: []
+                }
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                node.children.push(source.shift());
+                source.unshift(node);
+                return MultiplicativeExpression(source);
+            }
+            if (source[0].type === "MultiplicationExpression") {
+                return source[0];
+            }
+
+            return MultiplicativeExpression(source);
+        }
+
+        console.log(Expression(source));
+    </script>
+</body>
+
+</html>
