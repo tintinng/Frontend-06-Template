@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wildcard</title>
+</head>
+
+<body>
+    <script>
+        function find(source, pattern) {
+            // * 个数
+            let starCount = 0;
+            for (let i = 0; i < pattern.length; i++) {
+                if (pattern[i] === "*") {
+                    starCount++;
+                }
+            }
+            // 没有 * 的情况
+            if (starCount === 0) {
+                for (let i = 0; i < pattern.length; i++) {
+                    if (pattern[i] !== source[i] && pattern[i] !== "?") {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            let i = 0;
+            let lastIndex = 0;
+            // 匹配头部（第一个*之前）
+            for (i = 0; pattern[i] !== "*"; i++) {
+                if (pattern[i] !== source[i] && pattern[i] !== "?") {
+                    return false;
+                }
+            }
+
+            lastIndex = i;
+            for (let p = 0; p < starCount - 1; p++) {
+                i++;
+                // *之间的格式，记为 subPattern
+                let subPattern = "";
+                while (pattern[i] !== "*") {
+                    subPattern += pattern[i];
+                    i++;
+                }
+                // 中间过程使用正则处理...
+                // 将 subPattern 里的 ？替换为 正则中的任意字符
+                let reg = new RegExp(subPattern.replace(/\?/g, "[\\s\\S]"), "g")
+                reg.lastIndex = lastIndex;
+
+                // console.log(reg.exec(source));
+
+                if (!reg.exec(source)) {
+                    return false;
+                }
+                lastIndex = reg.lastIndex;
+            }
+            // 匹配尾部，最后一个 * 后面剩余的字符串
+            for (let j = 0; j <= source.length - lastIndex && pattern[pattern.length - j] !== "*"; j++) {
+                if (pattern[pattern.length - j] !== source[source.length - j] && pattern[pattern.length - j] !== "?") {
+                    return false;
+                }
+            }
+            return true;
+        }
+        console.log(find("abcdefghij", "a*d?e*?h*ij")); 
+    </script>
+</body>
+
+</html>
