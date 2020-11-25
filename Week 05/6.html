@@ -1,0 +1,84 @@
+<input id="b" type="range" min=0 max=255 />
+<input id="r" type="range" min=0 max=255 />
+<input id="g" type="range" min=0 max=255 />
+<div id="color" style="width: 100px;height: 100px;"></div>
+<script>
+    let callbacks = new Map();
+    let reactivities = new Map();
+
+    let usedReactivities = [];
+    let object = {
+        r: 1,
+        g: 1,
+        b: 1,
+    }
+
+    let proxy = reactive(object);
+
+    effect(() => {
+        document.getElementById("r").value = proxy.r;
+    })
+    effect(() => {
+        document.getElementById("g").value = proxy.g;
+    })
+    effect(() => {
+        document.getElementById("b").value = proxy.b;
+    })
+    effect(() => {
+        document.getElementById("color").style.background = `rgb(${proxy.r}, ${proxy.g}, ${proxy.b})`;
+    })
+    // 监听input事件
+    document.getElementById("r").addEventListener("input", event => proxy.r = event.target.value);
+    document.getElementById("g").addEventListener("input", event => proxy.g = event.target.value);
+    document.getElementById("b").addEventListener("input", event => proxy.b = event.target.value);
+
+    function effect(callback) {
+        // callbacks.push(callback);
+        usedReactivities = [];
+        // 调用一次函数
+        callback();
+        console.log(usedReactivities);
+        //
+        for (let reactivity of usedReactivities) {
+            if (!callbacks.has(reactivity[0])) {
+                callbacks.set(reactivity[0], new Map());
+            }
+            if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+                callbacks.get(reactivity[0]).set(reactivity[1], []);
+            }
+            callbacks.get(reactivity[0]).get(reactivity[1]).push(callback);
+        }
+    }
+
+    function reactive(object) {
+        if (reactivities.has(object)) {
+            return reactivities.get(object);
+        }
+
+        let proxy = new Proxy(object, {
+            set(obj, prop, val) {
+                obj[prop] = val;
+                if (callbacks.get(obj)) {
+                    if (callbacks.get(obj).get(prop)) {
+                        for (let callback of callbacks.get(obj).get(prop)) {
+                            callback();
+                        }
+                    }
+                }
+                return obj[prop];
+            },
+            get(obj, prop) {
+                // 记录使用到的变量和属性
+                usedReactivities.push([obj, prop]);
+                if (typeof obj[prop] === "object") {
+                    return reactive(obj[prop]);
+                }
+
+                return obj[prop];
+            }
+        })
+
+        reactivities.set(object, proxy);
+        return proxy;
+    }
+</script>
