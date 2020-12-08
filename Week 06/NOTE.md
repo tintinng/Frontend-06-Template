@@ -93,3 +93,48 @@ String.raw`\u00A9`  //  `\u00A9`
 - 对于要将来要保存对象值的变量，建议使用null来初始化
 ### Symbol
 - 代替String用于Object中的属性名
+## 对象Object
+### 对象三要素
+- 状态
+- 行为：**遵循“行为改变状态”的规则**
+- 唯一标识
+### 对象的属性
+- JavaScript中的属性既可以描述状态又可以描述行为
+#### 键（key）
+- String：使用者可以“猜出来”
+- Symbol：独一无二，即使是名字相同的两个Symbol也是不同的
+#### 值（value）
+- 数据属性（Data Property)特性
+```
+- [[Configurable]]：可否delete属性；可否修改特性；可否改为访问器属性。
+- [[Enumerable]]：属性可否通过for-in循环返回
+- [[Writable]]：属性值是否可修改
+- [[value]]：包含实际的值
+```
+- 访问器属性（Accessor Property）特性
+```
+访问器属性,通过Object.defineProperty()定义
+访问器属性可以设置函数钩子，在[[Get]]、[[Set]]的时候可以添加相应钩子操作
+
+- [[Configurable]]：可否delete属性；可否修改特性；可否改为数据属性
+- [[Enumerable]]：属性可否通过for-in循环返回
+- [[Get]]：获取函数
+- [[Set]]：设置函数
+```
+### 对象标识
+由于对象是引用类型，对象的引用值实际上是一个存放在栈内存中的指针，指向的实际内容存放在堆内存中。因此即使是内容相同的两个对象也是不相等的：
+```javascript
+{} === {} // false
+let a = {
+    name: 'a'
+}
+let b = {
+    name: 'b'
+}
+let c = a;
+a === b // false
+a === c // true
+```
+### 对象的原型
+- 直接创建的对象默认原型为Object，Object的原型是null
+- 通过构造函数创建的对象原型是构造函数prototype属性指向的对象，所有的对象原型都可以追溯到Object，形成原型链。
