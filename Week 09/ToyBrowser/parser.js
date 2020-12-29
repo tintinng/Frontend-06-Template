@@ -1,8 +1,132 @@
+const css = require('css');
+
 let currentToken = null;
 let currentAttribute = null;
 let currentTextNode = null;
 
 let stack = [{ type: "document", children: [] }];
+
+// 收集CSS规则
+let rules = [];
+function addCSSRules(text) {
+    // 使用node中的css模块来生成AST
+    var ast = css.parse(text);
+    console.log(JSON.stringify(ast, null, "   "));
+    rules.push(...ast.stylesheet.rules);
+}
+// CSS规则匹配（简单选择器匹配）
+function match(element, selector) {
+    if (!selector || !element.attributes) {
+        return false;
+    }
+
+    if (selector.charAt(0) == "#") {
+        // id选择器，找出element对应属性。并比较值
+        var attr = element.attributes.filter(attr => attr.name === "id")[0];
+        if (attr && attr.value === selector.replace("#", '')) {
+            return true;
+        }
+    } else if (selector.charAt(0) == ".") {
+        // class选择器，找出element对应属性。并比较值。只考虑一个class的情况
+        var attr = element.attributes.filter(attr => attr.name === "class")[0];
+        if (attr && attr.value === selector.replace(".", '')) {
+            return true;
+        }
+    } else {
+        if (element.tagName === selector) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// 计算specificity
+function specificity(selector) {
+    var p = [0, 0, 0, 0];
+    var selectorParts = selector.split(" ");
+    for (var part of selectorParts) {
+        if (part.charAt(0) == "#") {
+            p[1] += 1
+        } else if (part.charAt(0) == ".") {
+            p[2] += 1
+        } else {
+            p[3] += 1
+        }
+    }
+    return p;
+}
+// 比较specificity
+function compare(sp1, sp2) {
+    if (sp1[0] - sp2[0]) {
+        return sp1[0] - sp2[0];
+    }
+    if (sp1[1] - sp2[1]) {
+        return sp1[1] - sp2[1];
+    }
+    if (sp1[2] - sp2[2]) {
+        return sp1[2] - sp2[2];
+    }
+    return sp1[3] - sp2[3];
+}
+
+// 计算CSS
+function computeCSS(element) {
+    // console.log(rules);
+    // console.log("compute CSS for Element", element);
+    var elements = stack.slice().reverse();
+    if (!element.computedStyle) {
+        element.computedStyle = {};
+    }
+
+    // 遍历规则集
+    for (let rule of rules) {
+        // 忽略选择器列表的情况，所以直接取第一个进行处理
+        // 只考虑后代" "复杂选择器的情况
+        var selectorParts = rule.selectors[0].split(" ").reverse()
+
+        // 规则声明中最后一个不是当前元素
+        if (!match(element, selectorParts[0])) {
+            continue;
+        }
+
+        let matched = false;
+        // 当前选择器的位置
+        var j = 1;
+        // i表示当前元素的位置
+        for (var i = 0; i < elements.length; i++) {
+            if (match(elements[i], selectorParts[j])) {
+                j++;
+            }
+        }
+        if (j >= selectorParts.length) {
+            matched = true;
+        }
+
+        // 如果匹配到，则应用对应的规则
+        if (matched) {
+            // console.log("Element", element, "matched rule", rule);
+            // 匹配上后获取当前选择器的specificity
+            var sp = specificity(rule.selectors[0]);
+            var computedStyle = element.computedStyle;
+            // 遍历声明块
+            for (var declaration of rule.declarations) {
+                if (!computedStyle[declaration.property]) {
+                    computedStyle[declaration.property] = {}
+                }
+                if (!computedStyle[declaration.property].specificity) {
+                    // 声明的specificity不存在，则创建specificity并且直接应用声明
+                    computedStyle[declaration.property].value = declaration.value;
+                    computedStyle[declaration.property].specificity = sp;
+                } else if (compare(computedStyle[declaration.property].specificity, sp) < 0) {
+                    // 声明的specificity小于新来的specificity，替换specificity并应用新声明
+                    computedStyle[declaration.property].value = declaration.value;
+                    computedStyle[declaration.property].specificity = sp;
+                }
+            }
+            // console.log(element.computedStyle);
+        }
+    }
+}
 
 function emit(token) {
     // console.log(token);
@@ -28,9 +152,11 @@ function emit(token) {
                 });
             }
         }
+        // 在startTag入栈前计算对应的CSS
+        computeCSS(element);
 
         top.children.push(element);
-        element.parent = top;
+        // element.parent = top;
 
         if (!token.isSelfClosing) {
             stack.push(element);
@@ -41,6 +167,10 @@ function emit(token) {
         if (top.tagName != token.tagName) {
             throw new Error("Tag start end doesn't match!");
         } else {
+            // 遇到style标签的时候，执行添加CSS规则的操作
+            if (top.tagName === "style") {
+                addCSSRules(top.children[0].content);
+            }
             stack.pop();
         }
         currentTextNode = null;
