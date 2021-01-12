@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #div1 {
+            font-size: 50px;
+            line-height: 100px;
+            background-color: pink;
+        }
+
+        #div2 {
+            /* vertical-align: middle; */
+            vertical-align: text-bottom;
+            line-height: 70px;
+            width: 100px;
+            height: 150px;
+            background-color: aqua;
+            display: inline-block;
+        }
+
+        #div3 {
+            /* vertical-align: middle; */
+            vertical-align: text-top;
+            line-height: 70px;
+            width: 100px;
+            height: 150px;
+            background-color: aqua;
+            display: inline-block;
+        }
+
+        #div-wrapper1 {
+            /* 基线没有被影响 */
+            vertical-align: text-top;
+            /* vertical-align: middle; */
+            /* vertical-align: baseline; */
+            /* vertical-align: text-bottom; */
+            overflow: visible;
+            display: inline-block;
+            width: 1px;
+            height: 1px;
+        }
+
+        .div-line {
+            width: 1000px;
+            height: 1px;
+            background: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="div1">
+        <div id="div-wrapper1">
+            <div class="div-line"></div>
+        </div>
+        <!-- <div id="div-wrapper2">
+            <div class="div-line"></div>
+        </div> -->
+        <!-- <div id="div-wrapper3">
+            <div class="div-line"></div>
+        </div> -->
+        <span>Hello good 中文</span>
+        <div id="div2">b<br />c</div>
+        <div id="div3">b<br />c</div>
+    </div>
+</body>
+
+</html>
