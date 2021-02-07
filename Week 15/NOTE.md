@@ -1,1 +1,25 @@
 学习笔记
+### 动画
+#### setInterval\setTimeout
+- 只能设定固定时间
+- 执行时间并不一定是设定的时间（线程执行js脚本没有释放）
+- 当页面关闭后后台仍在运行
+#### requestAnimationFrame
+- 和显示器的刷新频率一致，在刷新间隔内只执行一次
+- 页面关闭后不再刷新
+### 手势
+#### 触摸事件
+- touchstart
+- touchmove
+- touchend
+- touchcancel
+#### 手势库
+- tap（点击）
+- press（长按）
+  - pressstart
+  - pressend
+- pan（滑动）
+  - panstart
+  - pan
+  - panend
+  - flick（快速滑动）
