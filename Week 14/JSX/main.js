@@ -40,12 +40,12 @@ class Carousel extends Component{
                 // console.log(x)
 
                 // move的过程中需要移动当前的和相邻的图片
-                for (let offset of [-1, 0, 1]) {
+                for (let offset of [-2, -1, 0, 1, 2]) {
+                    // 当前和前后相邻1的图（也可以是更多）
                     let pos = current + offset
-                    // 由于可能会向前拖动，因此要加上children.length再取余
-                    // 这样只能往负方向拖动一圈
-                    pos = (pos + children.length * 10) % children.length
-                    console.log("pos:"+pos)
+                    // 由于可能会向前拖动，因此要加上children.length再取余，取到图片下标
+                    pos = (pos + children.length) % children.length
+                    // console.log("pos:"+pos)
                     
                     // 图片移动的时候需要关掉transition
                     children[pos].style.transition = "none"
@@ -58,12 +58,18 @@ class Carousel extends Component{
                 // 鼠标up的x减去startX，往右拖拽时：x为负数
                 let x = event.clientX - startX
                 // round四舍五入，拖动超过一半则进一
+                // 拖动后当前视图应当显示的图片下标
                 position = position - Math.round(x / 500)
                 
+                // 鼠标释放的时候，需要移动当前的和相邻的（视图中相邻的只会有一个）
+                // 数组中第二个式子判断是前一个还是后一个
                 for (let offset of [0, - Math.sign(Math.round(x / 500) - x + 250 * Math.sign(x))]) {
+                    // console.log("offset:" + offset);
                     let pos = position + offset
                     pos = (pos + children.length) % children.length
+                    // console.log("pos:" + pos);
 
+                    // 将视图中相邻的图片移动到正确位置
                     children[pos].style.transition = ""
                     children[pos].style.transform = `translateX(${- pos * 500 + offset * 500}px)`
                 }
