@@ -242,12 +242,22 @@ export class Recognizer {
                 clientX: point.clientX,
                 clientY: point.clientY,
                 isVertical: context.isVertical,
-                isFlick: context.isFlick
+                isFlick: context.isFlick,
+                velocity: v
             })
         }
     
         // console.log(v)
         // console.log("end", point.clientX, point.clientY);
+        this.dispatcher.dispatch("end", {
+            startX: context.startX,
+            startY: context.startY,
+            clientX: point.clientX,
+            clientY: point.clientY,
+            isVertical: context.isVertical,
+            isFlick: context.isFlick,
+            velocity: v
+        })
     }
     cancel (point, context) {
         // console.log("cancel", point.clientX, point.clientY);
