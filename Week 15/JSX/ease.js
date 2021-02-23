@@ -1,3 +1,6 @@
+// 三次贝塞尔曲线
+// 通过两个控制点：p1、p2得到一个timingFunction（横轴为0~1的time，纵轴为0~1的progression）
+// 牛顿积分法，直接抄浏览器内 C++ 的代码
 export function cubicBezier(p1x, p1y, p2x, p2y) {
     const ZERO_LIMIT = 1e-6;
   
@@ -66,6 +69,7 @@ export function cubicBezier(p1x, p1y, p2x, p2y) {
     return solve;
 }
 
+// 导出常用的timingFunction
 export let linear = v => v;
 export let ease = cubicBezier(0.25, 0.1, 0.25, 1);
 export let easeIn = cubicBezier(0.42, 0, 1, 1);
