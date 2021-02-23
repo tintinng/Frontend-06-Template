@@ -1,5 +1,5 @@
 {
-  "name": "generator-toolchain",
+  "name": "generator-vue",
   "version": "1.0.0",
   "description": "",
   "main": "generators/app/index.js",

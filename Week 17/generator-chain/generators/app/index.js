@@ -5,12 +5,45 @@ module.exports = class extends Generator {
     constructor(args, opts) {
         super(args, opts);
     }
+    initPackage() {
+        const pkgJson = {
+            devDependencies: {
+                eslint: '^3.15.0'
+            },
+            dependencies: {
+                react: '^16.2.0'
+            }
+        };
 
-    method1() {
-        console.log('method 1 just ran');
+        this.fs.extendJSON(this.destinationPath('package.json'), pkgJson);
+        this.npmInstall();
     }
 
-    method2() {
-        console.log('method 2 just ran');
+    async step1() {
+        // 文件系统
+        // 创建文件模板
+        this.fs.copyTpl(
+            this.templatePath('t.html'),
+            this.destinationPath('public/index.html'),
+            { title: 'Templating with Yeoman' }
+        )
     }
+
+    // async method1() {
+    //     const answers = await this.prompt([
+    //         {
+    //             type: "input",
+    //             name: "name",
+    //             message: "Your project name",
+    //             default: this.appname
+    //         },
+    //         {
+    //             type: "confirm",
+    //             name: "cool",
+    //             message: "Would you like to enable the Cool feature?"
+    //         }
+    //     ])
+    //     this.log("app name", answers.name);
+    //     this.log("cool feature", answers.cool);
+    // }
 }
