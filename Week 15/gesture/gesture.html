@@ -3,6 +3,24 @@
     import {enableGesture} from "./gesture.js"
     enableGesture(document.documentElement)
     document.documentElement.addEventListener("tap", () => {
-        console.log("tap event trigger!")
+        console.log("tap!")
+    })
+    document.documentElement.addEventListener("flick", () => {
+        console.log("flick!")
+    })
+    document.documentElement.addEventListener("panstart", () => {
+        console.log("panstart!")
+    })
+    document.documentElement.addEventListener("pan", () => {
+        console.log("pan!")
+    })
+    document.documentElement.addEventListener("panend", () => {
+        console.log("panend!")
+    })
+    document.documentElement.addEventListener("press", () => {
+        console.log("press!")
+    })
+    document.documentElement.addEventListener("pressend", () => {
+        console.log("pressend!")
     })
 </script>

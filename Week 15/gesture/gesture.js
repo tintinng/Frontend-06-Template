@@ -1,6 +1,7 @@
 let element = document.documentElement
 // listen => recognize => dispatch
 
+// 派发事件
 export class Dispatcher {
     constructor(element) {
         this.element = element
@@ -17,6 +18,9 @@ export class Dispatcher {
         this.element.dispatchEvent(event)
     }
 }
+
+// 监听：鼠标事件和手势事件
+// 识别：start \ move \ end \ cancel
 export class Listener {
     constructor(element, recognizer){
         // 防止多个键同时按下move导致 move和up事件被多次监听
@@ -121,6 +125,9 @@ export class Listener {
         })
     }
 }
+
+// 识别：start \ move \ end \ cancel
+// 分发：tap \ press\pressend \ panstart\pan\panend \ flick
 export class Recognizer {
     constructor(dispatcher){
         this.dispatcher = dispatcher
