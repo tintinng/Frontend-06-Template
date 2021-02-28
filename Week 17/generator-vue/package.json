@@ -1,5 +1,5 @@
 {
-  "name": "generator-vue",
+  "name": "vue-demo",
   "version": "1.0.0",
   "description": "",
   "main": "generators/app/index.js",
@@ -9,6 +9,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "vue": "^2.6.12",
     "yeoman-generator": "^4.11.0"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^7.0.0",
+    "css-loader": "^5.1.0",
+    "vue-loader": "^15.9.6",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
   }
 }

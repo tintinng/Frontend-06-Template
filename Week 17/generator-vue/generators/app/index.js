@@ -42,12 +42,9 @@ module.exports = class extends Generator {
         this.fs.extendJSON(this.destinationPath('package.json'), pkgJson);
         // 自动安装对应依赖
         this.npmInstall(["vue"], { "save-dev": false });
-        this.npmInstall(["webpack", "webpack-cli", "vue-loader", "vue-style-loader", "css-loader",
-                        "vue-template-compiler"], { "save-dev": true });
-    }
-
-    // 拷贝模板文件
-    copyFiles() {
+        this.npmInstall(["webpack", "webpack-cli", "vue-loader", "vue-style-loader",
+         "css-loader", "vue-template-compiler", "copy-webpack-plugin"], { "save-dev": true });
+        
         this.fs.copyTpl(
             this.templatePath('HelloWorld.vue'),
             this.destinationPath('src/HelloWorld.vue'),
@@ -60,6 +57,11 @@ module.exports = class extends Generator {
         this.fs.copyTpl(
             this.templatePath('main.js'),
             this.destinationPath('src/main.js')
+        )
+        this.fs.copyTpl(
+            this.templatePath('index.html'),
+            this.destinationPath('src/index.html'),
+            { title: answer.name }
         )
     }
 }

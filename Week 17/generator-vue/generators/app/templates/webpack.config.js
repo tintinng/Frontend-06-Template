@@ -1,5 +1,6 @@
 const webpack = require('webpack'); // 用于访问内置插件
 const VueLoaderPlugin = require('vue-loader/lib/plugin') // vue-loader允许使用Vue SFC
+const CopyPlugin = require("copy-webpack-plugin");
 
 const config = {
     entry: "./src/main.js",
@@ -16,7 +17,12 @@ const config = {
         ]
     },
     plugins: [
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new CopyPlugin({
+            patterns: [
+              { from: "src/*.html", to: "[name].[ext]" }
+            ]
+        })
     ]
 };
 
