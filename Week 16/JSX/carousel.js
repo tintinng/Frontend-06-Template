@@ -14,41 +14,49 @@ export class Carousel extends Component{
         // 添加样式
         this.root.classList.add('carousel')
         // 给每一张轮播图都添加一个div，并将轮播图作为背景图片
+        // 组件的attribute
         for (let record of this[ATTRIBUTE].src) {
             let child = document.createElement("div")
             // child.src = record
             child.style.backgroundImage = `url('${record.img}')`
             this.root.appendChild(child)
         }
-
+        // 引入手势逻辑
         enableGesture(this.root)
+        // 启动动画时间线
         let timeline = new Timeline
         timeline.start()
-
+        // 轮播图的定时器，在手势介入的时候暂停
         let handler = null
 
+        // 获取每一张轮播图
         let children = this.root.children
-        // let position = 0  
-        // 将position改造到state上
+        // 记录当前展示的轮播图的下标，组件的state
         this[STATE].position = 0;
 
+        // 动画开始的时间和动画导致的位移
         let t = 0
         let ax = 0
 
+        // 添加事件的监听
+
         this.root.addEventListener("start", event => {
-            // 暂停动画时间线
+            // 当开始拖动轮播图的时候，暂停动画时间线并清除定时器
             timeline.pause()
             clearInterval(handler)
 
-            if (Date.now() - t < 1500) {
-                let progress = (Date.now() - t) / 1500
-                ax = ease(progress) * 500 - 500
+            if (Date.now() - t < 500) {
+                // 动画的时间进度
+                let timeProgress = (Date.now() - t) / 500
+                // 动画的位移进度（从-500到0）
+                ax = ease(timeProgress) * 500 - 500
             } else {
                 ax = 0
             }
         })
         
         this.root.addEventListener("tap", event => {
+            // tap的时候触发click事件
             this.triggerEvent("click", {
                 data: this[ATTRIBUTE].src[this[STATE].position],
                 position: this[STATE].position
@@ -56,6 +64,8 @@ export class Carousel extends Component{
         })
 
         this.root.addEventListener("pan", event => {
+            // 计算拖拽位移的时候减掉动画产生的位移
+            // 相当于实际手势拖动的位移 + “动画拖动的位移”
             let x = event.clientX - event.startX - ax
             let current = this[STATE].position - ((x - x % 500) / 500)
             for (let offset of [-1, 0, 1]) {
@@ -93,85 +103,44 @@ export class Carousel extends Component{
                 pos = (pos % children.length + children.length) % children.length
 
                 children[pos].style.transition = "none"
-                // children[pos].style.transform = `translateX(${}px)`
                 timeline.add(new Animation(children[pos].style, "transform",
                 - pos * 500 + offset * 500 + x % 500, 
                 - pos * 500 + offset * 500 + direction * 500, 
                 1500, 0, ease, v => `translateX(${v}px)`))
             }
 
+            // 更新position
             this[STATE].position = this[STATE].position - ((x - x % 500) / 500) - direction
             this[STATE].position = (this[STATE].position % children.length + children.length) % children.length
-            // 触发change事件
+            // 每切换一张轮播图触发一次change事件
             this.triggerEvent("change", { position: this[STATE].position })
         })
 
+        // 下一张轮播图
         let nextPicture = () => {
             let children = this.root.children
+            // 下一张轮播图的下标
             let nextIndex = (this[STATE].position + 1) % children.length
-
+            // 当前轮播图和下一张轮播图
             let current = children[this[STATE].position]
             let next = children[nextIndex]
-
+            
+            // 动画开始的时间
             t = Date.now()
-
-            // next.style.transition = "none"
-            // next.style.transform = `translateX(${500 - nextIndex * 500}px)`
-
+            // 当前轮播图移动的动画和下一张轮播图移动的动画
+            // 动画设定为只有一个方向
             timeline.add(new Animation(current.style, "transform",
                 - this[STATE].position * 500, -500 -this[STATE].position * 500, 500, 0, ease, v => `translateX(${v}px)`))
             timeline.add(new Animation(next.style, "transform",
                 500 - nextIndex * 500, -nextIndex * 500, 500, 0, ease, v => `translateX(${v}px)`));
 
             this[STATE].position = nextIndex
-            // 触发change事件
+            // 每切换一张轮播图触发一次change事件
             this.triggerEvent("change", { position: this[STATE].position })
         }
 
+        // 3s切换一张轮播图
         handler = setInterval(nextPicture, 3000)
-
-        /* 
-        this.root.addEventListener("mousedown", event => {
-            // console.log("mousedown")
-            let children = this.root.children
-            let startX = event.clientX
-
-            let move = event => {
-                // console.log("mousemove")
-                let x = event.clientX - startX
-
-                let current = position - ((x - x % 500) / 500)
-
-                for (let offset of [-1, 0, 1]) {
-                    let pos = current + offset
-                    pos = (pos + children.length) % children.length
-
-                    children[pos].style.transition = "none"
-                    children[pos].style.transform = `translateX(${- pos * 500 + offset * 500 + x % 500}px)`
-                }
-            }
-            
-            let up = event => {
-                // console.log("mouseup")   
-                let x = event.clientX - startX
-                position = position - Math.round(x / 500)
-                for (let offset of [0, - Math.sign(Math.round(x / 500) - x + 250 * Math.sign(x))]) {
-                    let pos = position + offset
-                    pos = (pos + children.length) % children.length
-
-                    children[pos].style.transition = ""
-                    children[pos].style.transform = `translateX(${- pos * 500 + offset * 500}px)`
-                }
-                document.removeEventListener("mousemove", move)
-                document.removeEventListener("mouseup", up)
-            }
-
-            document.addEventListener("mousemove",move)
-            document.addEventListener("mouseup", up)
-        })
-        */
-
-        // let currentIndex = 0
 
         return this.root
     }
