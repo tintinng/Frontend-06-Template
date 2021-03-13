@@ -66,8 +66,12 @@ export class Carousel extends Component{
         this.root.addEventListener("pan", event => {
             // 计算拖拽位移的时候减掉动画产生的位移
             // 相当于实际手势拖动的位移 + “动画拖动的位移”
+            // ax => (-500, 0) -ax => (500, 0) 动画往左边滑，相当于对于下一张来讲向右滑动了 -ax
             let x = event.clientX - event.startX - ax
+            // ((x - x % 500) / 500)和Math.floor()对于负数的处理不一样
+            // current表示拖动过程中当前展示的轮播图下标（注意并不一定是显示多的那一种轮播图，当前轮播图完全划过后current才是下一张，否则current是当前张）
             let current = this[STATE].position - ((x - x % 500) / 500)
+            // 将当前和前后三张轮播图移动到正确位置（pan过程中的位置）
             for (let offset of [-1, 0, 1]) {
                 let pos = current + offset
                 pos = (pos % children.length + children.length) % children.length
@@ -86,8 +90,9 @@ export class Carousel extends Component{
 
             let x = event.clientX - event.startX - ax
             let current = this[STATE].position - ((x - x % 500) / 500)
+            console.log("x:" + x + "---ax:" + ax + "---current:" + current);
 
-            // -1 \ 0 \ 1
+            // -1 \ 0 \ 1 end的时候应该回归的方向（-250到250为0）
             let direction = Math.round((x % 500) / 500)
 
             if (event.isFlick) {
@@ -97,12 +102,14 @@ export class Carousel extends Component{
                     direction = Math.floor((x % 500) / 500)
                 }
             }
-
+            // 将当前和前后三张轮播图移动到正确位置
             for (let offset of [-1, 0, 1]) {
                 let pos = current + offset
                 pos = (pos % children.length + children.length) % children.length
 
-                children[pos].style.transition = "none"
+                // children[pos].style.transition = "none"
+                // 起始位置：move过程中的位置
+                // 结束位置：应该回归的位置
                 timeline.add(new Animation(children[pos].style, "transform",
                 - pos * 500 + offset * 500 + x % 500, 
                 - pos * 500 + offset * 500 + direction * 500, 

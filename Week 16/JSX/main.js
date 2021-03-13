@@ -28,7 +28,7 @@ let d = [
 ]
 
 let a = <Carousel src={d} 
-            onChange={event => console.log(event.detail.position)}
+            onChange={event => console.log("当前轮播图：" + event.detail.position)}
             onClick={event => window.location.href = event.detail.data.url}/>
 
 // let a = <Button>
