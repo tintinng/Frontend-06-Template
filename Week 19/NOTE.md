@@ -35,3 +35,9 @@
 - 压缩文件夹
 ### unzipper
 - 解压文件夹
+
+## 使用Github oAuth做登录实例
+- 1. 打开：GET https://github.com/login/oauth/authorize
+- 2. auth路由：接收code，用code + client_id + client_secret 换 token
+- 3. 创建server，接受token，后点击发布
+- 4. publish路由：用token获取用户信息，检查权限，接受发布
