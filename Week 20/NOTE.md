@@ -7,3 +7,6 @@
 ## ESLint
 - 检查的是工作区的版本，而不是暂存区的版本
 - 在git stash push -k之后再检查
+
+## puppeteer
+- 使用puppeteer无头浏览器检查DOM
