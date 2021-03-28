@@ -27,22 +27,22 @@ let d = [
     }
 ]
 
-// let a = <Carousel src={d} 
-//             onChange={event => console.log("当前轮播图：" + event.detail.position)}
-//             onClick={event => window.location.href = event.detail.data.url}/>
+let a = <Carousel src={d} 
+            onChange={event => console.log("当前轮播图：" + event.detail.position)}
+            onClick={event => window.location.href = event.detail.data.url}/>
 
 // let a = <Button>
 //     Content
 // </Button>
 
 // 使用函数来创建模板
-let a = (<List data={d}>
-{(record) => 
-    <div>
-        <img src={record.img} />
-        <a href={record.url}>{record.title}</a>
-    </div>
-}
-</List>)
+// let a = (<List data={d}>
+// {(record) => 
+//     <div>
+//         <img src={record.img} />
+//         <a href={record.url}>{record.title}</a>
+//     </div>
+// }
+// </List>)
 
 a.mountTo(document.body)

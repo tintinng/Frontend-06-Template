@@ -39,7 +39,6 @@ export class Carousel extends Component{
         let ax = 0
 
         // 添加事件的监听
-
         this.root.addEventListener("start", event => {
             // 当开始拖动轮播图的时候，暂停动画时间线并清除定时器
             timeline.pause()

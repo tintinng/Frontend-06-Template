@@ -63,11 +63,10 @@ class Carousel extends Component{
                 
                 // 鼠标释放的时候，需要移动当前的和相邻的（视图中相邻的只会有一个）
                 // 数组中第二个式子判断是前一个还是后一个
-                for (let offset of [0, - Math.sign(Math.round(x / 500) - x + 250 * Math.sign(x))]) {
-                    // console.log("offset:" + offset);
+                // -Math.sign(Math.round(x / 500) - x + 250 * Math.sign(x))
+                for (let offset of [0,  -Math.sign( - x % 500 + 250 * Math.sign(x))]) {
                     let pos = position + offset
                     pos = (pos + children.length) % children.length
-                    // console.log("pos:" + pos);
 
                     // 将视图中相邻的图片移动到正确位置
                     children[pos].style.transition = ""
@@ -103,7 +102,17 @@ class Carousel extends Component{
 
         //         currentIndex = nextIndex
         //     }, 16)
-        // }, 2000)
+
+        //     // requestAnimationFrame(() => {
+        //     //     // 恢复去掉的过渡效果
+        //     //     next.style.transition = "ease 1s"
+        //     //     // 当前视图图片移动；下一张图片移到当前视图
+        //     //     current.style.transform = `translateX(${-100 - currentIndex * 100}%)`
+        //     //     next.style.transform = `translateX(${- nextIndex * 100}%)`
+
+        //     //     currentIndex = nextIndex
+        //     // })
+        // }, 3000)
 
         return this.root
     }
