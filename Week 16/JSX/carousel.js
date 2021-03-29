@@ -24,7 +24,7 @@ export class Carousel extends Component{
         // 引入手势逻辑
         enableGesture(this.root)
         // 启动动画时间线
-        let timeline = new Timeline
+        let timeline = new Timeline()
         timeline.start()
         // 轮播图的定时器，在手势介入的时候暂停
         let handler = null
@@ -85,6 +85,7 @@ export class Carousel extends Component{
             // 重启动画时间线
             timeline.reset()
             timeline.start()
+            // timeline.resume()
             handler = setInterval(nextPicture, 3000)
 
             let x = event.clientX - event.startX - ax
@@ -107,11 +108,9 @@ export class Carousel extends Component{
                 pos = (pos % children.length + children.length) % children.length
 
                 // children[pos].style.transition = "none"
-                // 起始位置：move过程中的位置
-                // 结束位置：应该回归的位置
                 timeline.add(new Animation(children[pos].style, "transform",
-                - pos * 500 + offset * 500 + x % 500, 
-                - pos * 500 + offset * 500 + direction * 500, 
+                - pos * 500 + offset * 500 + x % 500,   // 起始位置：move过程中的位置
+                - pos * 500 + offset * 500 + direction * 500,   // 结束位置：应该回归的位置 
                 1500, 0, ease, v => `translateX(${v}px)`))
             }
 
